@@ -1,5 +1,6 @@
 library(shiny)
 library(lubridate)
+library(leaflet)
 
 # year in the footer
 year_footer = year(Sys.Date())

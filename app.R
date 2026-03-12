@@ -32,14 +32,14 @@ ui <- tagList(
       tags$div(
         class = "navbar-buttons",
         tags$button(
-          id = "nav_accueil",
+          id = "nav_Home",
           class = "nav-btn active",
           `data-page` = "Home",
           onclick = "Shiny.setInputValue('current_page', 'Home')",
           "Home"
         ),
         tags$button(
-          id = "nav_data", 
+          id = "nav_analysis", 
           class = "nav-btn",
           `data-page` = "analysis",
           onclick = "Shiny.setInputValue('current_page', 'analysis')",
@@ -47,7 +47,7 @@ ui <- tagList(
         ),
         
         tags$button(
-          id = "nav_reporting", 
+          id = "nav_about", 
           class = "nav-btn",
           `data-page` = "about",
           onclick = "Shiny.setInputValue('current_page', 'about')",

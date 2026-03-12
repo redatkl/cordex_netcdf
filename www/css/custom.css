@@ -1,12 +1,38 @@
+/* Reset margins and padding */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Override Shiny's default container padding */
 body {
-        font-family: Arial, sans-serif;
-        background-color: white;
-      }
-      
-      .container-fluid {
-        padding: 0 !important;
-      }
-      
+  font-family: Arial, sans-serif;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Remove default Bootstrap container padding */
+.container-fluid {
+  padding: 0 !important;
+  margin: 0 !important;
+  /*display: flex;
+  flex-direction: column;
+  min-height: 100vh;*/
+  flex: 1;
+  width: 100% !important;
+  max-width: none !important;
+  background-color: white;
+}
+
+/* Ensure main content area takes full width */
+#app, .shiny-html-output {
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
       
       .navbar {
         background-color: #1e293b;
@@ -58,6 +84,19 @@ body {
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
       }
       
+      .tittle-left {
+        display: flex;
+        align-items: center;
+        padding-left: 15px;
+      }
+      
+      .tittle-left p {
+        margin: 0;
+        color: white;
+        font-size: 20px;
+        font-weight: bold;
+      }
+      
       /* Footer Styles */
       .footer {
         background-color: black;
@@ -74,6 +113,7 @@ body {
         /*max-width: 1200px;*/
         margin: 0 auto;
         padding: 10px 20px;
+        font-weight: bold;
       }
       
       .footer-left {

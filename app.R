@@ -23,8 +23,8 @@ ui <- tagList(
       
       # add first logo 
       tags$div(
-        class= "logo-left",
-        tags$a(href = "https://poledigital.ma", target = "_blank", tags$img(src = "logos/logo.png", height = "50px"))
+        class= "tittle-left",
+        tags$p("CORDEX Analysis")
       ),
       
     
@@ -57,12 +57,12 @@ ui <- tagList(
       # first logo on the right 
       tags$div(
         class= "logo-right",
-        tags$a(href = "https://www.agriculture.gov.ma/", target = "_blank", tags$img(src = "logos/logo_map.png", height = "50px"))
+        tags$a(href = "https://github.com/waterhy", target = "_blank", tags$img(src = "logos/github.svg", height = "50px",style = "background-color: white; border-radius: 50%; padding: 2px;"))
       ),
       # second logo on the right
       tags$div(
         class= "logo-right",
-        tags$a(href = "https://www.agriculture.gov.ma/fr/ministere/generation-green-2020-2030", target = "_blank", tags$img(src = "logos/logo_gen_green.png", height = "50px"))
+        tags$a(href = "https://www.linkedin.com/in/aikaterini-lyra-434143103", target = "_blank", tags$img(src = "logos/linkedin.svg", height = "50px"))
       )
     ),
     
@@ -96,7 +96,7 @@ ui <- tagList(
       # Center section - Logo and text
       tags$div(
         class = "footer-center",
-        tags$img(src = "logos/logo_footer.png", height = "20px", class = "footer-logo"),
+        #tags$img(src = "logos/logo_footer.png", height = "20px", class = "footer-logo"),
         tags$p(class = "footer-text", "CORDEX")
       ),
       # Right section - Can be empty or add content

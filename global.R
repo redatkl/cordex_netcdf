@@ -1,6 +1,10 @@
 library(shiny)
 library(lubridate)
 library(leaflet)
+library(terra)
+library(ggplot2)
+library(ncdf4)
+library(dplyr)
 
 # year in the footer
 year_footer = year(Sys.Date())

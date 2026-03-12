@@ -117,6 +117,10 @@ server <- function(input, output, session) {
       updateSelectInput(session, "current_page", selected = "Home")
     })
   
+  # Call module servers
+  home_module_server("Home")
+  analysis_module_server("analysis")
+  about_module_server("about")
 
 }
 

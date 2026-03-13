@@ -5,6 +5,7 @@ library(terra)
 library(ggplot2)
 library(ncdf4)
 library(dplyr)
+library(shinycssloaders)
 
 # year in the footer
 year_footer = year(Sys.Date())

@@ -15,3 +15,6 @@ source("R/modules/home_module.R")
 source("R/modules/analysis_module.R")
 source("R/modules/about_module.R")
 
+# Upload Limit
+options(shiny.maxRequestSize = 500 * 1024^2)
+

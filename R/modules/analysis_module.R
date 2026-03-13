@@ -44,8 +44,7 @@ analysis_module_ui <- function(id) {
           tags$div(
             class = "variable-item",
             tags$label("Select Variable"),
-            uiOutput(ns("variable_selector_container")) %>%
-              withSpinner(type = 4, color = "#007BFF", size = 0.5)
+            uiOutput(ns("variable_selector_container"))
           ),
           tags$div(
             class = "extraction-method-item",
@@ -59,9 +58,18 @@ analysis_module_ui <- function(id) {
           )
         ),
         
-         tags$button(
-            id = ns("config_button"),
-            class = "config-btn", "Config")
+        tags$div(
+          class = "coordinates-section",
+          tags$p("Select Point", class = "upload-title"),
+          numericInput(ns("input_lat"), "Latitude:", value = NA, step = 0.01),
+          numericInput(ns("input_lon"), "Longitude:", value = NA, step = 0.01)
+        ),
+        
+        actionButton(
+          ns("config_button"),
+          "Config",
+          class = "config-btn"
+        )
         
       ), 
       
@@ -94,8 +102,8 @@ analysis_module_server <- function(id) {
         attributionControl = FALSE,
         zoomControl = FALSE
       )) %>%
-        #addTiles() %>%
-        addProviderTiles(providers$Esri.WorldImagery) %>%
+        addTiles() %>%
+        #addProviderTiles(providers$Esri.WorldImagery) %>%
         setMaxBounds(lng1 = -180, lat1 = -90, lng2 = 180, lat2 = 90)%>%
         htmlwidgets::onRender("
           function(el, x) {
@@ -111,6 +119,152 @@ analysis_module_server <- function(id) {
           }
         ")
       
+    })
+    
+    # ---- Extraction ----
+    idw_points <- reactiveVal(NULL)
+    
+    extracted_data <- eventReactive(input$config_button, {
+      req(input$nc_files, input$variable_select, selected_point())
+      
+      results <- list()
+      
+      for (i in seq_len(nrow(input$nc_files))) {
+        nc <- nc_open(input$nc_files$datapath[i])
+        
+        var_vals <- ncvar_get(nc, input$variable_select)
+        lat_vals <- as.vector(ncvar_get(nc, "lat"))
+        lon_vals <- as.vector(ncvar_get(nc, "lon"))
+        lon_vals <- wrap_lon(lon_vals)
+        time_var <- ncvar_get(nc, "time")
+        time_units <- ncatt_get(nc, "time", "units")$value
+        time_dates <- as.Date(time_var, origin = sub(".*since ", "", time_units))
+        
+        nc_close(nc)
+        
+        dims <- dim(var_vals)
+        var_mat <- matrix(var_vals, nrow = dims[1] * dims[2], ncol = dims[3])
+        
+        dist <- (lat_vals - selected_point()[2])^2 +
+          (lon_vals - selected_point()[1])^2
+        
+        if (input$extraction_method == "near_neighbor") {
+          idx <- which.min(dist)
+          ts_vals <- var_mat[idx, ]
+          idw_points(data.frame(lon = lon_vals[idx], lat = lat_vals[idx]))
+          
+        } else {
+          # IDW - 4 neighbors, power=2
+          neighbors <- order(dist)[1:4]
+          d <- sqrt(dist[neighbors])
+          d[d == 0] <- 1e-10
+          weights <- 1 / (d^2)
+          weights <- weights / sum(weights)
+          ts_vals <- colSums(var_mat[neighbors, ] * weights)
+          idw_points(data.frame(lon = lon_vals[neighbors], lat = lat_vals[neighbors]))
+        }
+        
+        period_label <- paste0(min(time_dates), " to ", max(time_dates))
+        results[[i]] <- data.frame(
+          Time = time_dates,
+          FileLabel = period_label,
+          Value = as.numeric(ts_vals)
+        )
+      }
+      
+      bind_rows(results)
+    })
+    
+    # ---- Highlight Neighbor Points on Map ----
+    observe({
+      req(idw_points())
+      pts <- idw_points()
+      
+      leafletProxy(ns("map")) %>%
+        clearGroup("idw") %>%
+        addCircleMarkers(
+          data = pts,
+          lng = ~lon,
+          lat = ~lat,
+          radius = 6,
+          color = ifelse(input$extraction_method == "near_neighbor", "green", "red"),
+          fillOpacity = 0.8,
+          group = "idw"
+        )
+    })
+    
+    # ---- Selected Point ----
+    selected_point <- reactiveVal(NULL)
+    
+    # ---- Map Click ----
+    observeEvent(input$map_click, {
+      click <- input$map_click
+      selected_point(c(click$lng, click$lat))
+      
+      updateNumericInput(session, "input_lat", value = round(click$lat, 4))
+      updateNumericInput(session, "input_lon", value = round(click$lng, 4))
+      
+      leafletProxy(ns("map")) %>%
+        clearGroup("selected") %>%
+        addMarkers(
+          lng = click$lng,
+          lat = click$lat,
+          group = "selected"
+        )
+    })
+    
+    # ---- Manual Coordinate Input ----
+    observeEvent({
+      input$input_lat
+      input$input_lon
+    }, {
+      req(!is.na(input$input_lat), !is.na(input$input_lon))
+      
+      selected_point(c(input$input_lon, input$input_lat))
+      
+      leafletProxy(ns("map")) %>%
+        clearGroup("selected") %>%
+        addMarkers(
+          lng = input$input_lon,
+          lat = input$input_lat,
+          group = "selected"
+        )
+    }, ignoreInit = TRUE)
+    
+    
+    # ---- Longitude Wrapping Helper ----
+    wrap_lon <- function(lon_vals) {
+      if (max(lon_vals, na.rm = TRUE) > 180) {
+        lon_vals[lon_vals > 180] <- lon_vals[lon_vals > 180] - 360
+      }
+      return(lon_vals)
+    }
+    
+    # ---- Map Extent ----
+    map_extent <- reactive({
+      req(input$nc_files)
+      nc <- nc_open(input$nc_files$datapath[1])
+      lat_vals <- as.vector(ncvar_get(nc, "lat"))
+      lon_vals <- as.vector(ncvar_get(nc, "lon"))
+      nc_close(nc)
+      lon_vals <- wrap_lon(lon_vals)
+      list(lat_vals = lat_vals, lon_vals = lon_vals)
+    })
+    
+    # ---- Show Grid Points on Map ----
+    observe({
+      req(map_extent())
+      m <- map_extent()
+      leafletProxy(ns("map")) %>%
+        clearGroup("grid") %>%
+        addCircleMarkers(
+          lng = m$lon_vals,
+          lat = m$lat_vals,
+          radius = 2,
+          color = "blue",
+          fillOpacity = 0.4,
+          group = "grid"
+        )
     })
     
     # ---- Variable Selection ----

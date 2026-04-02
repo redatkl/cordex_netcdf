@@ -81,7 +81,8 @@ analysis_module_ui <- function(id) {
       
       tags$div(
         class = "chart-content",
-        tags$p("chart place")
+        tableOutput(ns("preview")),
+        plotOutput(ns("tsplot"))
       )
       
     )
@@ -92,6 +93,14 @@ analysis_module_ui <- function(id) {
 analysis_module_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+    
+    # ---- Longitude Wrapping Helper ----
+    wrap_lon <- function(lon_vals) {
+      if (max(lon_vals, na.rm = TRUE) > 180) {
+        lon_vals[lon_vals > 180] <- lon_vals[lon_vals > 180] - 360
+      }
+      return(lon_vals)
+    }
     
     # leaflet map
     output$map <- renderLeaflet({
@@ -232,14 +241,6 @@ analysis_module_server <- function(id) {
     }, ignoreInit = TRUE)
     
     
-    # ---- Longitude Wrapping Helper ----
-    wrap_lon <- function(lon_vals) {
-      if (max(lon_vals, na.rm = TRUE) > 180) {
-        lon_vals[lon_vals > 180] <- lon_vals[lon_vals > 180] - 360
-      }
-      return(lon_vals)
-    }
-    
     # ---- Map Extent ----
     map_extent <- reactive({
       req(input$nc_files)
@@ -299,6 +300,38 @@ analysis_module_server <- function(id) {
         choices = vars,
         selectize = FALSE 
       ) %>% tagAppendAttributes(class = "setting-select")
+    })
+    
+    # ---- Preview ----
+    output$preview <- renderTable({
+      df <- extracted_data()
+      
+      # Make sure df exists and has rows
+      validate(
+        need(!is.null(df) && nrow(df) > 0, "No data available. Select files and click 'Run'.")
+      )
+      
+      head(df)
+    })
+    
+    # --- Plot with legend showing periods ---
+    output$tsplot <- renderPlot({
+      df <- extracted_data()
+      # validate(
+      #   need(nrow(df) > 0, "No data to display")
+      # )
+      ggplot(df, aes(x=Time, y=Value, color=FileLabel)) +
+        geom_line() +
+        theme_minimal() +
+        labs(y=input$varname, color="Period") +
+        theme(
+          axis.text.x = element_text(size = 11),  # x-axis labels
+          axis.text.y = element_text(size = 11),  # y-axis labels
+          axis.title.x = element_text(size = 12, face = "bold"),  # x-axis title
+          axis.title.y = element_text(size = 12, face = "bold"),  # y-axis title
+          legend.text = element_text(size = 11),
+          legend.title = element_text(size = 12, face = "bold")
+        )
     })
     
   })

@@ -1,42 +1,67 @@
+/* ── Grid layout ─────────────────────────────────────────────── */
 .analysis-container {
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  grid-template-rows: repeat(8, 1fr);
-  grid-column-gap: 4px;
-  grid-row-gap: 4px;
+  grid-template-columns: 280px 1fr;          /* fixed left panel, flex right */
+  grid-template-rows: 1fr 280px;             /* map fills top, bottom strip fixed */
+  gap: 6px;
   height: calc(100vh - 105px);
   overflow: hidden;
-  margin: 0 5px; 
+  padding: 6px 8px;
+  box-sizing: border-box;
+  background: #f1f5f9;
 }
 
 .config-content {
-  grid-area: 1 / 1 / 9 / 3;
-  margin: 10px;
-}
-
-.chart-content {
-  grid-area: 6 / 3 / 9 / 9;
+  grid-row: 1 / 3;                           /* spans full height */
+  grid-column: 1 / 2;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 18px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
 }
 
 .map-content {
-  grid-area: 1 / 3 / 6 / 9;
-  height: 100%;
+  grid-row: 1 / 2;
+  grid-column: 2 / 3;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
 }
 
+.chart-content {
+  grid-row: 2 / 3;
+  grid-column: 2 / 3;
+  display: flex;
+  gap: 8px;
+  min-height: 0;
+}
+
+
+/* ── Left panel internals ────────────────────────────────────── */
 .config-title {
-  font-size: 18px;
-  font-weight: bold;
-  margin-bottom: -18px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.2;
+  margin: 0;
 }
 
 .config-subtitle {
-  font-size: 14px;
-  margin-bottom: -5px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  color: #64748b;
+  text-transform: uppercase;
+  margin: -4px 0 2px;
 }
 
-.upload-title {
-  font-weight: bold;
-  margin-bottom: 8px;
+/* Upload dropzone */
+.upload-section {
+  position: relative;
 }
 
 .upload-dropzone {
@@ -44,35 +69,314 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: 2px dashed #a0aec0;
+  border: 2px dashed #cbd5e1;
   border-radius: 10px;
-  padding: 15px;
+  padding: 14px 10px;
   cursor: pointer;
-  background-color: #f8fafc;
-  transition: border-color 0.2s;
-  width: 250px;
-  margin: 0 auto;
-  margin-bottom: 8px;
+  background: #f8fafc;
+  transition: border-color 0.2s, background 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
 }
 
 .upload-dropzone:hover {
   border-color: #3b82f6;
-  background-color: #eff6ff;
+  background: #eff6ff;
 }
 
 .upload-icon {
-  font-size: 32px;
-  margin-bottom: 8px;
+  font-size: 28px;
+  margin-bottom: 4px;
+  line-height: 1;
+}
+
+.upload-dropzone p {
+  margin: 2px 0;
+  font-size: 13px;
+  color: #475569;
 }
 
 .browse-link {
   color: #3b82f6;
-  font-weight: bold;
+  font-weight: 600;
 }
 
 .upload-subtext {
-  font-size: 12px;
+  font-size: 11px !important;
+  color: #94a3b8 !important;
+}
+
+/* Section labels */
+.section-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
   color: #94a3b8;
+  margin: 0 0 6px;
+}
+
+.settings-block {
+  border-top: 1px solid #f1f5f9;
+  padding-top: 10px;
+}
+
+.field-group {
+  margin-bottom: 8px;
+}
+
+.field-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  display: block;
+  margin-bottom: 4px;
+}
+
+/* Override Shiny selectInput to look like the screenshot dropdown */
+.setting-select,
+.field-group .form-group select,
+.field-group select {
+  width: 100% !important;
+  padding: 6px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #1e293b;
+  background: #f8fafc;
+  appearance: auto;
+  box-sizing: border-box;
+}
+
+/* Radio buttons — tighten spacing */
+.field-group .radio label {
+  font-size: 13px;
+  color: #374151;
+}
+
+.field-group .shiny-input-container {
+  margin-bottom: 0;
+}
+
+/* Coordinate inputs */
+.coord-row {
+  display: flex;
+  gap: 8px;
+}
+
+.coord-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.coord-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  display: block;
+  margin-bottom: 3px;
+}
+
+.coord-field .form-control {
+  padding: 5px 8px;
+  font-size: 13px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #f8fafc;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Run Extraction button */
+.run-btn {
+  background-color: #3b82f6 !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  padding: 9px 0 !important;
+  width: 100% !important;
+  cursor: pointer !important;
+  transition: background 0.2s !important;
+  box-shadow: 0 2px 6px rgba(59,130,246,.35) !important;
+}
+
+.run-btn:hover {
+  background-color: #2563eb !important;
+}
+
+/* Metadata block */
+.metadata-block {
+  border-top: 1px solid #f1f5f9;
+  padding-top: 10px;
+  flex: 1;
+}
+
+.metadata-table {
+  font-size: 12px;
+  color: #475569;
+}
+
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.meta-key {
+  font-weight: 600;
+  color: #374151;
+}
+
+.meta-val {
+  color: #64748b;
+  text-align: right;
+}
+
+/* Footer credit */
+.config-footer {
+  margin-top: auto;
+  padding-top: 6px;
+}
+
+.config-footer p {
+  font-size: 11px;
+  color: #94a3b8;
+  text-align: center;
   margin: 0;
 }
 
+
+/* ── Bottom: Chart + Preview ─────────────────────────────────── */
+.chart-panel {
+  flex: 1.6;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 14px 16px 10px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+  overflow: hidden;
+}
+
+.chart-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  flex-shrink: 0;
+}
+
+.chart-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.chart-subtitle {
+  font-size: 11px;
+  color: #64748b;
+  margin: 2px 0 0;
+}
+
+/* make the ggplot output fill remaining height */
+.chart-panel .shiny-plot-output {
+  flex: 1;
+  min-height: 0;
+}
+
+.preview-panel {
+  flex: 1;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 14px 16px 10px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+  overflow: hidden;
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+.preview-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: .03em;
+}
+
+.preview-subtitle {
+  font-size: 11px;
+  color: #94a3b8;
+  margin: 2px 0 0;
+}
+
+.export-btn {
+  background: #ffffff !important;
+  color: #374151 !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  padding: 5px 10px !important;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(0,0,0,.06) !important;
+}
+
+.export-btn:hover {
+  background: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+}
+
+/* Scrollable table */
+.preview-table-wrap {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  font-size: 12px;
+}
+
+.preview-table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.preview-table-wrap thead th {
+  position: sticky;
+  top: 0;
+  background: #f8fafc;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: #64748b;
+  padding: 6px 8px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.preview-table-wrap tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+.preview-table-wrap tbody td {
+  padding: 5px 8px;
+  color: #374151;
+  border-bottom: 1px solid #f1f5f9;
+}
